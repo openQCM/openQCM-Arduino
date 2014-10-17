@@ -1,7 +1,7 @@
 #openQCM-Arduino
 
 
-[openQCM](http://openqcm.com/) firmware for Arduinio Micro Board 
+[openQCM](http://openqcm.com/) firmware for Arduino Micro Board 
 
 ![openQCM-design](https://dl.dropboxusercontent.com/u/51833595/openQCM-hw.jpg)
 
