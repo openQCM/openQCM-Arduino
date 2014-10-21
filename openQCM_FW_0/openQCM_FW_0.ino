@@ -25,6 +25,7 @@
  * author     Marco Mauro 
  * version    0 (basic)
  * date       october 2014 
+ *
  */
  
  #include <FreqCount.h>
