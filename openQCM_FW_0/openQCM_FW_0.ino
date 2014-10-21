@@ -42,22 +42,24 @@
   Serial.write(255);
 }
 
+// map value to a double
+double map_value 
+(int x, int in_min, int in_max, double out_min, double out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 // measure temperature
 int getTemperature(void){
-  int Temperature = 0;   // PT100 temperature
   const int R_ref = 100;
-  const int calib = -10; // temperature calibration adcapocchiam
-  double volt = 0;       // measured volt on 
-  double alpha = 0;      // voltage to resistance factor
-  volt = analogRead(1);
-  volt = 5 - map(volt, 0, 1023, 0, 5);
-  alpha = volt/5;
+  double volt = map_value(analogRead(1), 0, 1023, 0, 5);
+  double alpha = volt/5;
   double resistance = (alpha/(1 - alpha))*R_ref;
   // PT100 linear relation between resistance and temperature
   // t(°C) = 2,596*R(ohm) - 259,8
   // Resistance range (100, 140) OHM*/  
-  Temperature= 2.596 * resistance - 259.8;
-  return (Temperature);
+  int Temperature= int ( 2.596 * resistance - 269.8 );
+  return(Temperature);
 }
 
 // variable declaration
