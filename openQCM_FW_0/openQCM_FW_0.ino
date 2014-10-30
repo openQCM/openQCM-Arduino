@@ -51,6 +51,8 @@ double map_value
 
 // measure temperature
 int getTemperature(void){
+  // TODO calibration measure
+  const int calib = - 32;
   const int R_ref = 100;
   double volt = map_value(analogRead(1), 0, 1023, 0, 5);
   double alpha = volt/5;
@@ -58,7 +60,9 @@ int getTemperature(void){
   // PT100 linear relation between resistance and temperature
   // t(°C) = 2,596*R(ohm) - 259,8
   // Resistance range (100, 140) OHM*/  
-  int Temperature= int ( 2.596 * resistance - 269.8 );
+  int Temperature = int ( 2.596 * resistance - 259.8 );
+  // TODO PT100 calibration measure 
+  Temperature = Temperature + calib;
   return(Temperature);
 }
 
