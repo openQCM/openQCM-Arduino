@@ -22,6 +22,10 @@
  * Measure QCM frequency using FreqCount library developed by Paul Stoffregen 
  * https://github.com/PaulStoffregen/FreqCount
  *
+ * NOTE       - designed for 10 Mhz At-cut quartz crystal
+ *            - 3.3 VDC supply voltage quartz crystal oscillator
+ *            - Configure EXTERNAL reference voltage used for analog input
+ *
  * author     Marco Mauro 
  * version    0 (basic)
  * date       october 2014 
@@ -31,7 +35,9 @@
  #include <FreqCount.h>
  
  // fixed "gate interval" time for counting cycles 1000ms  
- #define GATE 1000
+ #define GATE   1000
+ // fixed Nyquist–Shannon sampling frequency
+ #define ALIAS  8000000
  
  // print data to serial port 
  void dataPrint(unsigned long Count, int Temperature){
@@ -51,34 +57,43 @@ double map_value
 
 // measure temperature
 int getTemperature(void){
-  // TODO calibration measure
-  const int calib = - 32;
+  // TODO calibration
+  const int calib = - 18;
+  // resistor in voltage divider circuit
   const int R_ref = 100;
-  double volt = map_value(analogRead(1), 0, 1023, 0, 5);
-  double alpha = volt/5;
+  // voltage reference in voltage divider circuit
+  const double V_ref = 3.3;
+  double volt = map_value(analogRead(1), 0, 1023, 0, V_ref );
+  double alpha = volt/V_ref;
   double resistance = (alpha/(1 - alpha))*R_ref;
   // PT100 linear relation between resistance and temperature
   // t(°C) = 2,596*R(ohm) - 259,8
-  // Resistance range (100, 140) OHM*/  
+  // Resistance range (100, 140) OHM 
   int Temperature = int ( 2.596 * resistance - 259.8 );
-  // TODO PT100 calibration measure 
+  // TODO PT100 calibration  
   Temperature = Temperature + calib;
   return(Temperature);
 }
 
 // variable declaration
+// QCM frequency
 unsigned long frequency = 0;
+// counting the number of pulses in a fixed time 
+unsigned long count = 0;
 int temperature = 0;
 
 void setup(){
   Serial.begin(115200);
+  // Configure the reference voltage used for analog input 
+  analogReference(EXTERNAL);
   FreqCount.begin(GATE);
 }
 
 void loop(){
   if (FreqCount.available()) 
   {
-    frequency = FreqCount.read();       // measure frequency
+    count = FreqCount.read();           // counting the number of pulses
+    frequency = (2 * ALIAS) - count;    // measure QCM frequency
     temperature = getTemperature();     // measure temperature 
     dataPrint(frequency, temperature);  // print data
   }
