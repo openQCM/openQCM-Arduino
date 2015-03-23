@@ -25,22 +25,37 @@
  * NOTE       - designed for 10 Mhz At-cut quartz crystal
  *            - 3.3 VDC supply voltage quartz crystal oscillator
  *            - Configure EXTERNAL reference voltage used for analog input
+ *            - Thermistor temperature sensor
  *
  * author     Marco Mauro 
- * version    0 (basic)
- * date       october 2014 
+ * version    1.0
+ * date       march 2015 
  *
  */
- 
- #include <FreqCount.h>
- 
- // fixed "gate interval" time for counting cycles 1000ms  
- #define GATE   1000
- // fixed Nyquist–Shannon sampling frequency
- #define ALIAS  8000000
- 
- // print data to serial port 
- void dataPrint(unsigned long Count, int Temperature){
+
+// include library for frequency counting
+#include <FreqCount.h>
+
+// fixed "gate interval" time for counting cycles 1000ms  
+#define GATE   1000
+// fixed Nyquist–Shannon sampling frequency
+#define ALIAS  8000000
+// Thermistor pin
+#define THERMISTORPIN A1 
+// // resistance at 25 degrees C
+#define THERMISTORNOMINAL 10000
+// temp. for nominal resistance (almost always 25 C)
+#define TEMPERATURENOMINAL 25   
+// how many samples to take and average 
+#define NUMSAMPLES 10
+// The beta coefficient of the thermistor (usually 3000-4000)
+#define BCOEFFICIENT 3950
+// the value of the 'other' resistor
+#define SERIESRESISTOR 10000    
+
+
+// print data to serial port 
+void dataPrint(unsigned long Count, int Temperature){
   Serial.print("RAWMONITOR");
   Serial.print(Count);
   Serial.print("_");
@@ -48,30 +63,41 @@
   Serial.write(255);
 }
 
-// map value to a double
-double map_value 
-(int x, int in_min, int in_max, double out_min, double out_max)
-{
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
 
 // measure temperature
 int getTemperature(void){
-  // TODO calibration
-  const int calib = - 18;
-  // resistor in voltage divider circuit
-  const int R_ref = 100;
-  // voltage reference in voltage divider circuit
-  const double V_ref = 3.3;
-  double volt = map_value(analogRead(1), 0, 1023, 0, V_ref );
-  double alpha = volt/V_ref;
-  double resistance = (alpha/(1 - alpha))*R_ref;
-  // PT100 linear relation between resistance and temperature
-  // t(°C) = 2,596*R(ohm) - 259,8
-  // Resistance range (100, 140) OHM 
-  int Temperature = int ( 2.596 * resistance - 259.8 );
-  // TODO PT100 calibration  
-  Temperature = Temperature + calib;
+  int i;
+  float average;
+  int samples[NUMSAMPLES];
+  float thermistorResistance;
+  int Temperature; 
+
+  // acquire N samples
+  for (i=0; i< NUMSAMPLES; i++) {
+    samples[i] = analogRead(THERMISTORPIN);
+    delay(10);
+  }
+
+  // average all the samples out
+  average = 0;
+  for (i=0; i< NUMSAMPLES; i++) {
+    average += samples[i];
+  }
+  average /= NUMSAMPLES;
+
+  // convert the value to resistance
+  thermistorResistance = average * SERIESRESISTOR / (1023 - average);
+  
+  float steinhart;
+  steinhart = thermistorResistance / THERMISTORNOMINAL;          // (R/Ro)
+  steinhart = log(steinhart);                       // ln(R/Ro)
+  steinhart /= BCOEFFICIENT;                        // 1/B * ln(R/Ro)
+  steinhart += 1.0 / (TEMPERATURENOMINAL + 273.15); // + (1/To)
+  steinhart = 1.0 / steinhart;                      // Invert
+  steinhart -= 273.15;                              // convert to C
+
+  // decimal value
+  Temperature = steinhart * 10;
   return(Temperature);
 }
 
@@ -80,12 +106,14 @@ int getTemperature(void){
 unsigned long frequency = 0;
 // counting the number of pulses in a fixed time 
 unsigned long count = 0;
+// thermistor temperature
 int temperature = 0;
 
 void setup(){
   Serial.begin(115200);
   // Configure the reference voltage used for analog input 
   analogReference(EXTERNAL);
+  // init the frequency counter
   FreqCount.begin(GATE);
 }
 
@@ -98,3 +126,4 @@ void loop(){
     dataPrint(frequency, temperature);  // print data
   }
 }
+
