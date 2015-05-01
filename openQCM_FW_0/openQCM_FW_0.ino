@@ -22,14 +22,14 @@
  * Measure QCM frequency using FreqCount library developed by Paul Stoffregen 
  * https://github.com/PaulStoffregen/FreqCount
  *
- * NOTE       - designed for 10 Mhz At-cut quartz crystal
+ * NOTE       - designed for 6 and 10 Mhz At-cut quartz crystal
  *            - 3.3 VDC supply voltage quartz crystal oscillator
  *            - Configure EXTERNAL reference voltage used for analog input
  *            - Thermistor temperature sensor
  *
  * author     Marco Mauro 
- * version    1.0
- * date       march 2015 
+ * version    1.1
+ * date       april 2015 
  *
  */
 
@@ -38,8 +38,6 @@
 
 // fixed "gate interval" time for counting cycles 1000ms  
 #define GATE   1000
-// fixed Nyquist–Shannon sampling frequency
-#define ALIAS  8000000
 // Thermistor pin
 #define THERMISTORPIN A1 
 // // resistance at 25 degrees C
@@ -101,11 +99,8 @@ int getTemperature(void){
   return(Temperature);
 }
 
-// variable declaration
-// QCM frequency
+// QCM frequency by counting the number of pulses in a fixed time 
 unsigned long frequency = 0;
-// counting the number of pulses in a fixed time 
-unsigned long count = 0;
 // thermistor temperature
 int temperature = 0;
 
@@ -120,8 +115,7 @@ void setup(){
 void loop(){
   if (FreqCount.available()) 
   {
-    count = FreqCount.read();           // counting the number of pulses
-    frequency = (2 * ALIAS) - count;    // measure QCM frequency
+    frequency = FreqCount.read();       // measure QCM frequency
     temperature = getTemperature();     // measure temperature 
     dataPrint(frequency, temperature);  // print data
   }
