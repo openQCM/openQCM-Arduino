@@ -6,7 +6,7 @@
 ![openQCM-design](https://dl.dropboxusercontent.com/u/51833595/openQCM-hw.jpg)
 
 ##Intro##
-This is the basic Arduino firmware for using openQCM. The repository is designed for the contributors community of the open source project. The openQCM Arduino firmware measures the frequency of the quartz crystal microbalance using the [FreqCount library](https://github.com/PaulStoffregen/FreqCount) developed by Paul Stoffregen. 
+This is Arduino firmware version 1.2 for using openQCM. The repository is designed for the contributors community of the open source project. The openQCM Arduino firmware measures the frequency of the quartz crystal microbalance using the [FreqCount library](https://github.com/PaulStoffregen/FreqCount) developed by Paul Stoffregen. 
 
 ##License##
 openQCM ia free software licensed under [GNU GPL v3.0](http://www.gnu.org/licenses/gpl-3.0.txt) General Public License
