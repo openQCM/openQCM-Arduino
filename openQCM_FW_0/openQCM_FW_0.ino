@@ -28,7 +28,7 @@
  *            - Thermistor temperature sensor
  *
  * author     Marco Mauro 
- * version    1.1
+ * version    1.2
  * date       april 2015 
  *
  */
