@@ -1,5 +1,5 @@
 /* LICENSE
- * Copyright (C) 2014 openQCM
+ * openQCM ia free software licensed under GNU GPL v3.0 General Public License 2016
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,17 +15,19 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/gpl-3.0.txt
  *
  * INTRO
- * openQCM is the unique opensource quartz crystal microbalance http://openqcm.com/
+ * openQCM is the unique open source quartz crystal microbalance http://openqcm.com/
  * openQCM Java software project is available on github repository 
  * https://github.com/marcomauro/openQCM
  * 
  * Measure QCM frequency using FreqCount library developed by Paul Stoffregen 
  * https://github.com/PaulStoffregen/FreqCount
  *
- * NOTE       - designed for 6 and 10 Mhz At-cut quartz crystal
+ * NOTE       - designed for arduino micro board
+ *            - designed for 6 and 10 Mhz At-cut quartz crystal
  *            - 3.3 VDC supply voltage quartz crystal oscillator
  *            - Configure EXTERNAL reference voltage used for analog input
  *            - Thermistor temperature sensor
+ *            - read the openQCM serial number in EEPROM
  *
  * author     Marco Mauro 
  * version    1.2
@@ -35,6 +37,8 @@
 
 // include library for frequency counting
 #include <FreqCount.h>
+// include EERPOM library
+#include <EEPROM.h>
 
 // fixed "gate interval" time for counting cycles 1000ms  
 #define GATE   1000
@@ -49,7 +53,13 @@
 // The beta coefficient of the thermistor (usually 3000-4000)
 #define BCOEFFICIENT 3950
 // the value of the 'other' resistor
-#define SERIESRESISTOR 10000    
+#define SERIESRESISTOR 10000  
+// current address in EEPROM series
+#define ADDRESS_SERIES 0
+// current address in EEPROM first number 
+#define ADDRESS_NUMBERFIRST 1
+// current address in EEPROM second number 
+#define ADDRESS_NUMBERSECOND 2
 
 
 // print data to serial port 
@@ -113,6 +123,22 @@ void setup(){
 }
 
 void loop(){
+  // read the openQCM serial number at the connection
+  if (Serial.available()) {
+    int val = Serial.parseInt();
+    if (val == 1){
+      byte valueSeries = EEPROM.read(ADDRESS_SERIES);
+      byte valueNumberFirst = EEPROM.read(ADDRESS_NUMBERFIRST);
+      byte valueNumberSecond = EEPROM.read(ADDRESS_NUMBERSECOND);
+      Serial.print("SERIALNUMBER");
+      Serial.print(valueSeries, DEC);
+      Serial.print(valueNumberFirst, DEC);
+      Serial.print(valueNumberSecond, DEC);
+      Serial.write(255);
+    }
+  }
+  
+  // read quartz crystal microbalance frequency and temperature 
   if (FreqCount.available()) 
   {
     frequency = FreqCount.read();       // measure QCM frequency
