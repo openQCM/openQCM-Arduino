@@ -15,4 +15,4 @@ Follow the wiki for more info and the latest update on openQCM Arduino firmware.
 ## Acknowledgements
 - [Novaetech S.r.l.](http://www.novaetech.it/en/) for supporting and powering the openQCM project. 
 - Paul Stoffregen for developing the [FreqCount library](https://github.com/PaulStoffregen/FreqCount).
-- Lady Ada aka Limor Fried and Kevin Townsend at Adafruit Industries foe devloping [Adafruit_MCP9808_Library](https://github.com/adafruit/Adafruit_MCP9808_Library)
+- Lady Ada aka Limor Fried and Kevin Townsend at Adafruit Industries for devloping [Adafruit_MCP9808_Library](https://github.com/adafruit/Adafruit_MCP9808_Library)
